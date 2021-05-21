@@ -1,0 +1,94 @@
+import RPi.GPIO as GPIO
+import RPi_I2C_driver
+import time
+import socket
+
+HOST = '192.168.0.50'
+PORT = 8000
+
+#create socket and connect to server
+BS=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+BS.connect((HOST,PORT))
+BS.settimeout(None) 
+print("connected.")
+
+
+#==================================================================================================
+def send_message(busnumber):
+    print("Add one passenger to {}".format(busnumber))
+    print("{} button clicked".format(busnumber))
+    
+    BS.sendall("{}".format(busnumber).encode("ascii")) #Forward counter imformation to server
+    
+    
+def Transfer_Complete():
+    mylcd.lcd_clear()
+    mylcd.lcd_display_string_pos("Transfer",2,1)
+    time.sleep(1)
+    mylcd.lcd_display_string_pos("complete",3,1)
+    time.sleep(2)
+#==================================================================================================
+    
+#sensor preset
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+MS=20 #motion sensor
+BT_1 = 13 
+BT_2 = 19
+BT_3 = 26
+
+GPIO.setup(MS,GPIO.IN)
+GPIO.setup(BT_1,GPIO.IN)
+GPIO.setup(BT_2,GPIO.IN)
+GPIO.setup(BT_3,GPIO.IN)
+
+mylcd = RPi_I2C_driver.lcd()#make object of lcd monitor
+
+count = 0
+
+while True:
+    
+    if (GPIO.input(MS)==True): # if motion sensor detect any motion
+        count = 0
+
+        mylcd.lcd_display_string_pos("Hello, ", 1,1)
+        mylcd.lcd_display_string_pos("Please select", 2,1)
+        mylcd.lcd_display_string_pos("a BUS to board",3,1)
+        
+        print ("Motion detected anyway...")
+        B1_clk = GPIO.input(13)
+        B2_clk = GPIO.input(19)
+        B3_clk = GPIO.input(26)
+        
+        #mylcd.lcd_display_string_pos("Hello, select a BUS", 1,1)
+        
+            
+        if (B1_clk == True):#click button1
+            print("Button 1 clicked")
+            
+            send_message(649)#send information
+            Transfer_Complete()
+       
+        elif (B2_clk == True):#click button2
+            print("Button 2 clicked")
+            
+            send_message(449)#send information
+            Transfer_Complete()
+       
+        elif (B3_clk == True):#click button3
+            print("Button 3 clicked")
+            
+            send_message(724)#send information
+            Transfer_Complete()
+        
+        continue
+
+    elif(GPIO.input(MS)==False):
+        print ("Motion not detected")
+        count += 1
+        print("{}".format(count))
+        
+        if (count > 1000):
+            mylcd.backlight(0)
+
+
