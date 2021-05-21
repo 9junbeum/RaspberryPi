@@ -1,0 +1,108 @@
+import socket
+from threading import Thread, Lock
+import time
+import datetime
+
+lock = Lock()
+HOST = ''
+PORT = 8000
+clients = {}
+
+busstop1_649 = 0
+busstop1_449 = 0
+busstop1_724 = 0
+
+#process about read, write the data
+def Bus_thread(sock,ip):
+    global busstop1_649
+    global busstop1_449
+    global busstop1_724
+    
+    #sock.sendall('{}'.format(a).encode("ascii"))
+    while True:
+        #print(clients)
+        #print("\n")
+        data = sock.recv(1024)
+        if not data:
+            break
+        msg = data.decode("ascii")
+        print(datetime.datetime.now(), msg)
+        if(msg == "bus_stop1"):
+            sock.sendall('{}'.format(busstop1_649).encode("ascii"))
+            print("649 transmission")
+            busstop1_649 = 0
+            
+        elif(msg == "bus_stop2"):
+            sock.sendall('{}'.format(busstop1_449).encode("ascii"))
+            print("449 transmission")
+            busstop1_449 = 0
+            
+        elif(msg == "bus_stop3"):
+            sock.sendall('{}'.format(busstop1_724).encode("ascii"))
+            print("724 transmission")
+            busstop1_724 = 0
+            
+        else:
+            sock.sendall("E".encode("ascii"))
+
+def Bus_Stop_thread(sock,ip):
+    
+    #sock.sendall('{}'.format(a).encode("ascii"))
+    while True:
+        #print(clients)
+        #print("\n")
+        data = sock.recv(1024)
+        if not data:
+            break
+        msg = data.decode("ascii")
+        print(datetime.datetime.now(), msg)
+        if(msg == "649"):
+            global busstop1_649
+            busstop1_649 += 1 
+        elif(msg == "449"):
+            global busstop1_449
+            busstop1_449 += 1 
+        elif(msg == "724"):
+            global busstop1_724
+            busstop1_724 += 1 
+        else:
+            print("Error in receive bus number")
+            sock.sendall("Error".encode("ascii"))
+
+#create socket and read,write in thread
+def run_socket():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind((HOST, PORT))
+        global clients
+
+        while True:
+            s.listen(1)
+            conn,(ip,port) = s.accept()
+            
+            lock.acquire()
+            clients[ip] = conn
+            lock.release()
+            
+            #bus
+            if(ip == "192.168.0.51"):
+                t = Thread(target = Bus_thread, args = (conn,ip,))
+                print("Run bus thread")
+                t.start()
+            
+            #bus_stop
+            elif(ip == "192.168.0.52"):
+                t = Thread(target = Bus_Stop_thread, args = (conn,ip,))
+                print("Run busstop thread")
+                t.start()
+
+#create socket in thread
+socket_thread = Thread(target=run_socket)
+socket_thread.start()
+    
+    
+    
+
+
+
+
