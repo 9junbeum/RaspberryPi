@@ -24,4 +24,6 @@ this is my second project for graduate university
 
 [2021ESWContest_자유공모_1052_타요타요_개발완료보고서.pdf](https://github.com/9junbeum/RaspberryPi_Bus_alert/files/7191511/2021ESWContest_._1052_._.pdf)
 
+# 시연 동영상(Youtube)
+https://www.youtube.com/watch?v=Mnl96Z-PX24
 
