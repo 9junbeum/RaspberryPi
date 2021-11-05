@@ -27,3 +27,6 @@ this is my second project for graduate university
 # 시연 동영상(Youtube)
 https://www.youtube.com/watch?v=Mnl96Z-PX24
 
+# 개선사항 
+동작 감지 또는 lcd 표시 할 때 
+inturupt 방식으로 입력을 받도록 한다. 
